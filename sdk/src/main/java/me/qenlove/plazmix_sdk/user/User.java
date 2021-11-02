@@ -1,5 +1,6 @@
 package me.qenlove.plazmix_sdk.user;
 
+import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -10,10 +11,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import me.qenlove.plazmix_sdk.models.PlayerGroups;
-import me.qenlove.plazmix_sdk.models.Badge;
-import me.qenlove.plazmix_sdk.models.Image;
-import me.qenlove.plazmix_sdk.models.OnlineStatus;
+import me.qenlove.plazmix_sdk.models.*;
 import org.asynchttpclient.AsyncCompletionHandler;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.Response;
@@ -36,24 +34,27 @@ public class User {
         return GetRequest.getRequestBuilder();
     }
 
+    public OnlineStatusRequest.OnlineStatusRequestBuilder onlineStatus() {
+        return OnlineStatusRequest.onlineStatusRequestBuilder();
+    }
+
+    public StaffRequest.StaffRequestBuilder staff() {
+        return StaffRequest.staffRequestBuilder();
+    }
+
+    public MeRequest.MeRequestBuilder me() {
+        return MeRequest.meRequestBuilder();
+    }
+
     @Getter
     @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-    public static class GetRequest {
+    public record GetRequest(String token, String nickname, UUID uuid, int id) {
 
         private static final String REQUEST_URL_FORMAT = "https://api.plazmix.net/v1/User.get";
 
-        String token;
-        String nickname;
-        UUID uuid;
-        int id;
-
         @Builder(builderClassName = "GetRequestBuilder", builderMethodName = "getRequestBuilder",
                 access = AccessLevel.PUBLIC)
-        private GetRequest(String token, String nickname, UUID uuid, int id) {
-            this.token = token;
-            this.nickname = nickname;
-            this.uuid = uuid;
-            this.id = id;
+        public GetRequest {
         }
 
         public CompletableFuture<GetResponse> execute() {
@@ -75,21 +76,7 @@ public class User {
     @Getter
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
     @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-    public static class GetResponse {
-
-        boolean successful;
-        String errorName;
-        String comment;
-
-        String nickname;
-        UUID uuid;
-        int id;
-        int level;
-        PlayerGroups groups;
-        List<UUID> friends;
-        List<Badge> badges;
-        OnlineStatus onlineStatus;
-        Image image;
+    public record GetResponse(boolean successful, String errorName, String comment, UserData userData) {
 
         static GetResponse fromJsonResponse(String jsonResponse) {
             JsonObject object = JsonParser.parseString(jsonResponse).getAsJsonObject();
@@ -99,50 +86,156 @@ public class User {
             String comment = Optional.ofNullable(object.get("comment"))
                     .map(JsonElement::getAsString)
                     .orElse(null);
+            UserData userData = UserData.fromJsonObject(object);
+            return new GetResponse(errorName == null, errorName, comment, userData);
+        }
+    }
 
-            String nickname = Optional.ofNullable(object.get("nickname"))
+    @Getter
+    @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+    public record OnlineStatusRequest(String token, String nickname, UUID uuid, int id) {
+
+        private static final String REQUEST_URL_FORMAT = "https://api.plazmix.net/v1/User.onlineStatus";
+
+        @Builder(builderClassName = "OnlineStatusRequestBuilder", builderMethodName = "onlineStatusRequestBuilder",
+                access = AccessLevel.PUBLIC)
+        public OnlineStatusRequest {
+        }
+
+        public CompletableFuture<OnlineStatusResponse> execute() {
+            return ASYNC_HTTP_CLIENT.preparePost(REQUEST_URL_FORMAT)
+                    .addHeader("Application-Token", token)
+                    .addBodyPart(new StringPart("nickname", nickname))
+                    .addBodyPart(new StringPart("uuid", uuid.toString()))
+                    .addBodyPart(new StringPart("id", String.valueOf(id)))
+                    .execute(new AsyncCompletionHandler<OnlineStatusResponse>() {
+                        @Override
+                        public OnlineStatusResponse onCompleted(Response response) {
+                            return OnlineStatusResponse.fromJsonResponse(response.getResponseBody());
+                        }
+                    })
+                    .toCompletableFuture();
+        }
+    }
+
+    @Getter
+    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+    @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+    public record OnlineStatusResponse(boolean successful, String errorName, String comment,
+                                       OnlineStatus status) {
+
+        static OnlineStatusResponse fromJsonResponse(String jsonResponse) {
+            JsonObject object = JsonParser.parseString(jsonResponse).getAsJsonObject();
+            String errorName = Optional.ofNullable(object.get("name"))
                     .map(JsonElement::getAsString)
                     .orElse(null);
-            UUID uuid = Optional.ofNullable(object.get("uuid"))
+            String comment = Optional.ofNullable(object.get("comment"))
                     .map(JsonElement::getAsString)
-                    .map(UUID::fromString)
-                    .orElse(null);
-            int id = Optional.ofNullable(object.get("id"))
-                    .map(JsonElement::getAsInt)
-                    .orElse(-1);
-            int level = Optional.ofNullable(object.get("level"))
-                    .map(JsonElement::getAsInt)
-                    .orElse(-1);
-            PlayerGroups playerGroups = Optional.ofNullable(object.get("groups"))
+                    .orElse(null); //todo COMMENT deserialized twice
+            OnlineStatus status = Optional.ofNullable(object.get("status"))
                     .map(JsonElement::getAsJsonObject)
-                    .map(PlayerGroups::fromJsonObject)
-                    .orElse(PlayerGroups.empty());
-            List<UUID> friends = Optional.ofNullable(object.get("friends"))
-                    .map(jsonElement -> GSON.<List<UUID>>fromJson(jsonElement,
-                            TypeToken.getParameterized(ArrayList.class, UUID.class).getType()))
-                    .orElse(new ArrayList<>());
-            List<Badge> badges = Optional.ofNullable(object.get("badges"))
+                    .map(OnlineStatus::fromJsonObject)
+                    .orElse(null);
+            return new OnlineStatusResponse(errorName == null, errorName, comment, status);
+        }
+    }
+
+    @Getter
+    @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+    public record StaffRequest(String token, Rank rank) {
+
+        private static final String REQUEST_URL_FORMAT = "https://api.plazmix.net/v1/User.staff";
+
+        @Builder(builderClassName = "StaffRequestBuilder", builderMethodName = "staffRequestBuilder",
+                access = AccessLevel.PUBLIC)
+        public StaffRequest {
+            Preconditions.checkState(rank.getRankType() == RankType.STAFF, "Specified rank " +
+                    "doesn't belong to staff");
+        }
+
+        public CompletableFuture<StaffResponse> execute() {
+            return ASYNC_HTTP_CLIENT.preparePost(REQUEST_URL_FORMAT)
+                    .addHeader("Application-Token", token)
+                    .addBodyPart(new StringPart("staff_group", rank.getRankType().toString()))
+                    .execute(new AsyncCompletionHandler<StaffResponse>() {
+                        @Override
+                        public StaffResponse onCompleted(Response response) {
+                            return StaffResponse.fromJsonResponse(response.getResponseBody());
+                        }
+                    })
+                    .toCompletableFuture();
+        }
+    }
+
+    @Getter
+    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+    @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+    public record StaffResponse(boolean successful, String errorName, String comment,
+                                       List<UserData> staff) {
+
+        static StaffResponse fromJsonResponse(String jsonResponse) {
+            JsonObject object = JsonParser.parseString(jsonResponse).getAsJsonObject();
+            String errorName = Optional.ofNullable(object.get("name"))
+                    .map(JsonElement::getAsString)
+                    .orElse(null);
+            String comment = Optional.ofNullable(object.get("comment"))
+                    .map(JsonElement::getAsString)
+                    .orElse(null);
+            List<UserData> staff = Optional.ofNullable(object.get("staffs"))
                     .map(JsonElement::getAsJsonArray)
                     .map(jsonElements -> {
-                        List<Badge> addableList = new ArrayList<>();
+                        List<UserData> addableList = new ArrayList<>();
                         for (JsonElement element : jsonElements) {
-                            addableList.add(Badge.valueOf(element.getAsJsonObject().get("technical_name").getAsString()
-                                    .toUpperCase()));
+                            addableList.add(UserData.fromJsonObject(element.getAsJsonObject()));
                         }
                         return addableList;
                     })
                     .orElse(new ArrayList<>());
-            OnlineStatus onlineStatus = Optional.ofNullable(object.get("online"))
-                    .map(JsonElement::getAsJsonObject)
-                    .map(OnlineStatus::fromJsonObject)
-                    .orElse(null);
-            Image image = Optional.ofNullable(object.get("image"))
-                    .map(JsonElement::getAsJsonObject)
-                    .map(Image::fromJsonObject)
-                    .orElse(null);
+            return new StaffResponse(errorName == null, errorName, comment, staff);
+        }
 
-            return new GetResponse(errorName == null, errorName, comment, nickname, uuid, id, level,
-                    playerGroups, friends, badges, onlineStatus, image);
+    }
+
+    @Getter
+    @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+    public record MeRequest(String token) {
+
+        private static final String REQUEST_URL_FORMAT = "https://api.plazmix.net/v1/User.me";
+
+        @Builder(builderClassName = "MeRequestBuilder", builderMethodName = "meRequestBuilder",
+                access = AccessLevel.PUBLIC)
+        public MeRequest {
+        }
+
+        public CompletableFuture<MeResponse> execute() {
+            return ASYNC_HTTP_CLIENT.prepareGet(REQUEST_URL_FORMAT)
+                    .addHeader("Authorization", token)
+                    .execute(new AsyncCompletionHandler<MeResponse>() {
+                        @Override
+                        public MeResponse onCompleted(Response response) {
+                            return MeResponse.fromJsonResponse(response.getResponseBody());
+                        }
+                    })
+                    .toCompletableFuture();
+        }
+    }
+
+    @Getter
+    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+    @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+    public record MeResponse(boolean successful, String errorName, String comment,
+                                UserData userData) {
+
+        static MeResponse fromJsonResponse(String jsonResponse) {
+            JsonObject object = JsonParser.parseString(jsonResponse).getAsJsonObject();
+            String errorName = Optional.ofNullable(object.get("name"))
+                    .map(JsonElement::getAsString)
+                    .orElse(null);
+            String comment = Optional.ofNullable(object.get("comment"))
+                    .map(JsonElement::getAsString)
+                    .orElse(null);
+            UserData userData = UserData.fromJsonObject(object);
+            return new MeResponse(errorName == null, errorName, comment, userData);
         }
 
     }

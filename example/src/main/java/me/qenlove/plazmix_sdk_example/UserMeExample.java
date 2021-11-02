@@ -4,21 +4,18 @@ import me.qenlove.plazmix_sdk.PlazmixApiClient;
 
 import java.util.UUID;
 
-public class UserExample {
+public class UserMeExample {
 
     @SuppressWarnings("All")
     public static void main(String... args) {
         PlazmixApiClient api = new PlazmixApiClient();
         api.user()
-                .get()
-                .id(1)
-                .nickname("test")
-                .uuid(UUID.randomUUID())
+                .me()
                 .build()
                 .execute()
-                .thenAccept(getResponse -> {
-                    if (getResponse.isSuccessful()) {
-                        System.out.println("Welcome back, " + getResponse.getNickname());
+                .thenAccept(meResponse -> {
+                    if (meResponse.isSuccessful()) {
+                        System.out.println("Authorized as " + meResponse.getUserData().getNickname());
                     }
                 });
     }

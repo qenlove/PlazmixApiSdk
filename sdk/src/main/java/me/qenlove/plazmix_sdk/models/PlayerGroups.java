@@ -30,7 +30,6 @@ public class PlayerGroups {
                 })
                 .orElse(null);
 
-        //todo Do something about it
         List<Rank> subordinateGroups = Optional.ofNullable(object.get("groups"))
                 .map(jsonElement -> {
                     List<Rank> addableList = new ArrayList<>();
