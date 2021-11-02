@@ -1,0 +1,25 @@
+plugins {
+    id 'java'
+}
+
+group 'me.qenlove.plazmix'
+version '0.0.1'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+
+    compileOnly 'org.projectlombok:lombok:1.18.22'
+    implementation 'com.google.guava:guava:r05'
+    implementation 'org.asynchttpclient:async-http-client-bom:2.12.3'
+    implementation 'org.asynchttpclient:async-http-client:2.12.3'
+    implementation 'com.google.code.gson:gson:2.8.9'
+}
+
+test {
+    useJUnitPlatform()
+}
