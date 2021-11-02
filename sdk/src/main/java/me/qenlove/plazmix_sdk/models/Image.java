@@ -21,18 +21,18 @@ public class Image {
     EnumMap<VariantType, Variant> variants;
 
     public static Image fromJsonObject(JsonObject object) {
-        ImageIdentifier identifier = Optional.ofNullable(object.get("identifier"))
+        var identifier = Optional.ofNullable(object.get("identifier"))
                 .map(JsonElement::getAsJsonObject)
                 .map(JsonObject::getAsString)
                 .map(String::toUpperCase)
                 .map(ImageIdentifier::valueOf)
                 .orElse(null);
-        String skinRaw = Optional.ofNullable(object.get("skin_raw"))
+        var skinRaw = Optional.ofNullable(object.get("skin_raw"))
                 .map(JsonElement::getAsJsonObject)
                 .map(JsonObject::getAsString)
                 .orElse(null);
 
-        EnumMap<VariantType, Variant> variants = Optional.ofNullable(object.get("variants"))
+        var variants = Optional.ofNullable(object.get("variants"))
                 .map(JsonElement::getAsJsonObject)
                 .map(obj -> obj.keySet().stream()
                         .map(s -> new AbstractMap.SimpleEntry<>(VariantType.valueOf(s.toUpperCase()),
@@ -61,15 +61,15 @@ public class Image {
     public record Variant(String size100, String size150, String size300) {
 
         public static Variant fromJsonObject(JsonObject object) {
-            String size100 = Optional.ofNullable(object.get("size_100").getAsJsonObject())
+            var size100 = Optional.ofNullable(object.get("size_100").getAsJsonObject())
                     .map(JsonElement::getAsJsonObject)
                     .map(JsonObject::getAsString)
                     .orElse(null);
-            String size150 = Optional.ofNullable(object.get("size_150").getAsJsonObject())
+            var size150 = Optional.ofNullable(object.get("size_150").getAsJsonObject())
                     .map(JsonElement::getAsJsonObject)
                     .map(JsonObject::getAsString)
                     .orElse(null);
-            String size300 = Optional.ofNullable(object.get("size_300").getAsJsonObject())
+            var size300 = Optional.ofNullable(object.get("size_300").getAsJsonObject())
                     .map(JsonElement::getAsJsonObject)
                     .map(JsonObject::getAsString)
                     .orElse(null);

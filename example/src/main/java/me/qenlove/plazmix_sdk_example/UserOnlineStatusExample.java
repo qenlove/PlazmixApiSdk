@@ -8,7 +8,7 @@ public class UserOnlineStatusExample {
 
     @SuppressWarnings("All")
     public static void main(String... args) {
-        PlazmixApiClient api = new PlazmixApiClient();
+        var api = new PlazmixApiClient();
         api.user()
                 .onlineStatus()
                 .id(1)
@@ -17,9 +17,9 @@ public class UserOnlineStatusExample {
                 .build()
                 .execute()
                 .thenAccept(onlineStatusResponse -> {
-                    if (onlineStatusResponse.isSuccessful()) {
-                        System.out.println("You are " + onlineStatusResponse.getStatus().getStatus());
-                        System.out.println("Comment " + onlineStatusResponse.getStatus().getComment());
+                    if (onlineStatusResponse.successful()) {
+                        System.out.println("You are " + onlineStatusResponse.status().status());
+                        System.out.println("Comment " + onlineStatusResponse.status().comment());
                     }
                 });
     }

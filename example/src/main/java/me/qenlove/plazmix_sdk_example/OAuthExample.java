@@ -7,8 +7,8 @@ public class OAuthExample {
 
     @SuppressWarnings("All")
     public static void main(String... args) {
-        PlazmixApiClient api = new PlazmixApiClient();
-        String url = api.oAuth()
+        var api = new PlazmixApiClient();
+        var url = api.oAuth()
                 .playerAuthorizationCodeFlow()
                 .clientRequest()
                 .responseType(PlayerAuthorizationCodeFlow.ResponseType.CODE)
@@ -20,7 +20,7 @@ public class OAuthExample {
                 .buildUrl();
         // redirect client to url
 
-        String code = "qwertyuiop"; // received from client at redirect_uri
+        var code = "qwertyuiop"; // received from client at redirect_uri
         api.oAuth()
                 .playerAuthorizationCodeFlow()
                 .tokenRequest()
@@ -32,14 +32,14 @@ public class OAuthExample {
                 .execute()
                 .thenAccept(tokenResponse -> {
                     System.out.println("The request was " +
-                            (tokenResponse.isSuccessful() ? "successful" : "not successful"));
-                    if (tokenResponse.isSuccessful()) {
-                        System.out.println("Access token: " + tokenResponse.getAccessToken());
-                        System.out.println("Token type: " + tokenResponse.getTokenType());
-                        System.out.println("Expires: " + tokenResponse.getExpiresIn());
+                            (tokenResponse.successful() ? "successful" : "not successful"));
+                    if (tokenResponse.successful()) {
+                        System.out.println("Access token: " + tokenResponse.accessToken());
+                        System.out.println("Token type: " + tokenResponse.tokenType());
+                        System.out.println("Expires: " + tokenResponse.expiresIn());
                     } else {
-                        System.out.println("Error name: " + tokenResponse.getErrorName());
-                        System.out.println("Comment: " + tokenResponse.getComment());
+                        System.out.println("Error name: " + tokenResponse.errorName());
+                        System.out.println("Comment: " + tokenResponse.comment());
                     }
                 });
     }

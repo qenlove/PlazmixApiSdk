@@ -15,8 +15,7 @@ public enum Badge {
     TOP_WORKER("Почетный участник команды"),
     WORKER("Участник команды"),
     PARTNER_DEVELOPER("Разработчик партнёрского приложения"),
-    PLUS_SUB("Подписка +")
-    ;
+    PLUS_SUB("Подписка +");
 
     String name;
 

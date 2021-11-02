@@ -8,7 +8,7 @@ public class UserGetExample {
 
     @SuppressWarnings("All")
     public static void main(String... args) {
-        PlazmixApiClient api = new PlazmixApiClient();
+        var api = new PlazmixApiClient();
         api.user()
                 .get()
                 .id(1)
@@ -17,8 +17,8 @@ public class UserGetExample {
                 .build()
                 .execute()
                 .thenAccept(getResponse -> {
-                    if (getResponse.isSuccessful()) {
-                        System.out.println("Welcome back, " + getResponse.getUserData().getNickname());
+                    if (getResponse.successful()) {
+                        System.out.println("Welcome back, " + getResponse.userData().nickname());
                     }
                 });
     }

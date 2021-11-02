@@ -1,17 +1,13 @@
 package me.qenlove.plazmix_sdk.user;
 
 import com.google.common.base.Preconditions;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.reflect.TypeToken;
 import lombok.AccessLevel;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import me.qenlove.plazmix_sdk.models.*;
+import me.qenlove.plazmix_sdk.models.OnlineStatus;
+import me.qenlove.plazmix_sdk.models.Rank;
+import me.qenlove.plazmix_sdk.models.RankType;
 import org.asynchttpclient.AsyncCompletionHandler;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.Response;
@@ -27,7 +23,6 @@ import static org.asynchttpclient.Dsl.asyncHttpClient;
 
 public class User {
 
-    private static final Gson GSON = new Gson();
     private static final AsyncHttpClient ASYNC_HTTP_CLIENT = asyncHttpClient();
 
     public GetRequest.GetRequestBuilder get() {
@@ -46,8 +41,6 @@ public class User {
         return MeRequest.meRequestBuilder();
     }
 
-    @Getter
-    @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     public record GetRequest(String token, String nickname, UUID uuid, int id) {
 
         private static final String REQUEST_URL_FORMAT = "https://api.plazmix.net/v1/User.get";
@@ -55,6 +48,9 @@ public class User {
         @Builder(builderClassName = "GetRequestBuilder", builderMethodName = "getRequestBuilder",
                 access = AccessLevel.PUBLIC)
         public GetRequest {
+            Preconditions.checkNotNull(token, "Token not specified");
+            Preconditions.checkNotNull(nickname, "Nickname not specified");
+            Preconditions.checkNotNull(uuid, "UUID not specified");
         }
 
         public CompletableFuture<GetResponse> execute() {
@@ -73,26 +69,21 @@ public class User {
         }
     }
 
-    @Getter
-    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-    @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     public record GetResponse(boolean successful, String errorName, String comment, UserData userData) {
 
         static GetResponse fromJsonResponse(String jsonResponse) {
-            JsonObject object = JsonParser.parseString(jsonResponse).getAsJsonObject();
-            String errorName = Optional.ofNullable(object.get("name"))
+            var object = JsonParser.parseString(jsonResponse).getAsJsonObject();
+            var errorName = Optional.ofNullable(object.get("name"))
                     .map(JsonElement::getAsString)
                     .orElse(null);
-            String comment = Optional.ofNullable(object.get("comment"))
+            var comment = Optional.ofNullable(object.get("comment"))
                     .map(JsonElement::getAsString)
                     .orElse(null);
-            UserData userData = UserData.fromJsonObject(object);
+            var userData = UserData.fromJsonObject(object);
             return new GetResponse(errorName == null, errorName, comment, userData);
         }
     }
 
-    @Getter
-    @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     public record OnlineStatusRequest(String token, String nickname, UUID uuid, int id) {
 
         private static final String REQUEST_URL_FORMAT = "https://api.plazmix.net/v1/User.onlineStatus";
@@ -100,6 +91,9 @@ public class User {
         @Builder(builderClassName = "OnlineStatusRequestBuilder", builderMethodName = "onlineStatusRequestBuilder",
                 access = AccessLevel.PUBLIC)
         public OnlineStatusRequest {
+            Preconditions.checkNotNull(token, "Token not specified");
+            Preconditions.checkNotNull(nickname, "Nickname not specified");
+            Preconditions.checkNotNull(uuid, "UUID not specified");
         }
 
         public CompletableFuture<OnlineStatusResponse> execute() {
@@ -118,21 +112,18 @@ public class User {
         }
     }
 
-    @Getter
-    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-    @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     public record OnlineStatusResponse(boolean successful, String errorName, String comment,
                                        OnlineStatus status) {
 
         static OnlineStatusResponse fromJsonResponse(String jsonResponse) {
-            JsonObject object = JsonParser.parseString(jsonResponse).getAsJsonObject();
-            String errorName = Optional.ofNullable(object.get("name"))
+            var object = JsonParser.parseString(jsonResponse).getAsJsonObject();
+            var errorName = Optional.ofNullable(object.get("name"))
                     .map(JsonElement::getAsString)
                     .orElse(null);
-            String comment = Optional.ofNullable(object.get("comment"))
+            var comment = Optional.ofNullable(object.get("comment"))
                     .map(JsonElement::getAsString)
                     .orElse(null); //todo COMMENT deserialized twice
-            OnlineStatus status = Optional.ofNullable(object.get("status"))
+            var status = Optional.ofNullable(object.get("status"))
                     .map(JsonElement::getAsJsonObject)
                     .map(OnlineStatus::fromJsonObject)
                     .orElse(null);
@@ -140,8 +131,6 @@ public class User {
         }
     }
 
-    @Getter
-    @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     public record StaffRequest(String token, Rank rank) {
 
         private static final String REQUEST_URL_FORMAT = "https://api.plazmix.net/v1/User.staff";
@@ -149,6 +138,8 @@ public class User {
         @Builder(builderClassName = "StaffRequestBuilder", builderMethodName = "staffRequestBuilder",
                 access = AccessLevel.PUBLIC)
         public StaffRequest {
+            Preconditions.checkNotNull(token, "Token not specified");
+            Preconditions.checkNotNull(rank, "Rank not specified");
             Preconditions.checkState(rank.getRankType() == RankType.STAFF, "Specified rank " +
                     "doesn't belong to staff");
         }
@@ -167,21 +158,18 @@ public class User {
         }
     }
 
-    @Getter
-    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-    @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     public record StaffResponse(boolean successful, String errorName, String comment,
                                        List<UserData> staff) {
 
         static StaffResponse fromJsonResponse(String jsonResponse) {
-            JsonObject object = JsonParser.parseString(jsonResponse).getAsJsonObject();
-            String errorName = Optional.ofNullable(object.get("name"))
+            var object = JsonParser.parseString(jsonResponse).getAsJsonObject();
+            var errorName = Optional.ofNullable(object.get("name"))
                     .map(JsonElement::getAsString)
                     .orElse(null);
-            String comment = Optional.ofNullable(object.get("comment"))
+            var comment = Optional.ofNullable(object.get("comment"))
                     .map(JsonElement::getAsString)
                     .orElse(null);
-            List<UserData> staff = Optional.ofNullable(object.get("staffs"))
+            var staff = Optional.ofNullable(object.get("staffs"))
                     .map(JsonElement::getAsJsonArray)
                     .map(jsonElements -> {
                         List<UserData> addableList = new ArrayList<>();
@@ -193,11 +181,8 @@ public class User {
                     .orElse(new ArrayList<>());
             return new StaffResponse(errorName == null, errorName, comment, staff);
         }
-
     }
 
-    @Getter
-    @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     public record MeRequest(String token) {
 
         private static final String REQUEST_URL_FORMAT = "https://api.plazmix.net/v1/User.me";
@@ -205,6 +190,7 @@ public class User {
         @Builder(builderClassName = "MeRequestBuilder", builderMethodName = "meRequestBuilder",
                 access = AccessLevel.PUBLIC)
         public MeRequest {
+            Preconditions.checkNotNull(token, "Token not specified");
         }
 
         public CompletableFuture<MeResponse> execute() {
@@ -220,24 +206,20 @@ public class User {
         }
     }
 
-    @Getter
-    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-    @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     public record MeResponse(boolean successful, String errorName, String comment,
                                 UserData userData) {
 
         static MeResponse fromJsonResponse(String jsonResponse) {
-            JsonObject object = JsonParser.parseString(jsonResponse).getAsJsonObject();
-            String errorName = Optional.ofNullable(object.get("name"))
+            var object = JsonParser.parseString(jsonResponse).getAsJsonObject();
+            var errorName = Optional.ofNullable(object.get("name"))
                     .map(JsonElement::getAsString)
                     .orElse(null);
-            String comment = Optional.ofNullable(object.get("comment"))
+            var comment = Optional.ofNullable(object.get("comment"))
                     .map(JsonElement::getAsString)
                     .orElse(null);
-            UserData userData = UserData.fromJsonObject(object);
+            var userData = UserData.fromJsonObject(object);
             return new MeResponse(errorName == null, errorName, comment, userData);
         }
-
     }
 
 }

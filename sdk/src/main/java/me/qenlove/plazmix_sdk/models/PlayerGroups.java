@@ -1,6 +1,5 @@
 package me.qenlove.plazmix_sdk.models;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import lombok.AccessLevel;
@@ -23,17 +22,17 @@ public class PlayerGroups {
     List<Rank> subordinateGroups;
 
     public static PlayerGroups fromJsonObject(JsonObject object) {
-        Rank mainGroup = Optional.ofNullable(object.get("main_group"))
+        var mainGroup = Optional.ofNullable(object.get("main_group"))
                 .map(jsonElement -> {
-                    JsonObject mainGroupObject = jsonElement.getAsJsonObject();
+                    var mainGroupObject = jsonElement.getAsJsonObject();
                     return Rank.valueOf(mainGroupObject.get("technical_name").getAsString());
                 })
                 .orElse(null);
 
-        List<Rank> subordinateGroups = Optional.ofNullable(object.get("groups"))
+        var subordinateGroups = Optional.ofNullable(object.get("groups"))
                 .map(jsonElement -> {
                     List<Rank> addableList = new ArrayList<>();
-                    JsonArray array = jsonElement.getAsJsonArray();
+                    var array = jsonElement.getAsJsonArray();
                     for (JsonElement groupElement : array) {
                         addableList.add(Rank.valueOf(groupElement.getAsJsonObject().get("technical_name")
                                 .getAsString()));
