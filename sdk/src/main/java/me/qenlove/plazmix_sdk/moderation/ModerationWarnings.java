@@ -20,7 +20,12 @@ import static org.asynchttpclient.Dsl.asyncHttpClient;
 
 public class ModerationWarnings {
 
-    private static final AsyncHttpClient ASYNC_HTTP_CLIENT = asyncHttpClient();
+    private static AsyncHttpClient ASYNC_HTTP_CLIENT = asyncHttpClient();
+
+    public ModerationWarnings withSpecifiedAsyncHttpClient(AsyncHttpClient asyncHttpClient) {
+        ASYNC_HTTP_CLIENT = asyncHttpClient;
+        return this;
+    }
 
     public GetModeratorRequest.GetModeratorRequestBuilder getModerator() {
         return GetModeratorRequest.getModeratorRequestBuilder();
@@ -30,7 +35,7 @@ public class ModerationWarnings {
         return GetRequest.getRequestBuilder();
     }
 
-    public record GetModeratorRequest(String token, UUID uuid) {
+    public static record GetModeratorRequest(String token, UUID uuid) {
 
         private static final String REQUEST_URL_FORMAT = "https://api.plazmix.net/v1/ModeratorAlert.getModerator";
 
@@ -55,7 +60,7 @@ public class ModerationWarnings {
         }
     }
 
-    public record GetModeratorResponse(boolean successful, String errorName, String comment, List<Warning> warnings) {
+    public static record GetModeratorResponse(boolean successful, String errorName, String comment, List<Warning> warnings) {
 
         static GetModeratorResponse fromJsonResponse(String jsonResponse) {
             var object = JsonParser.parseString(jsonResponse).getAsJsonObject();
@@ -79,7 +84,7 @@ public class ModerationWarnings {
         }
     }
 
-    public record GetRequest(String token, int alertId) {
+    public static record GetRequest(String token, int alertId) {
 
         private static final String REQUEST_URL_FORMAT = "https://api.plazmix.net/v1/ModeratorAlert.get";
 
@@ -103,7 +108,7 @@ public class ModerationWarnings {
         }
     }
 
-    public record GetResponse(boolean successful, String errorName, String comment, Warning warning) {
+    public static record GetResponse(boolean successful, String errorName, String comment, Warning warning) {
 
         static GetResponse fromJsonResponse(String jsonResponse) {
             var object = JsonParser.parseString(jsonResponse).getAsJsonObject();

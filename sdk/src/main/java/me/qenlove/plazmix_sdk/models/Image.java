@@ -56,9 +56,7 @@ public class Image {
         AVATAR, HEAD, BUST, BODY
     }
 
-    @AllArgsConstructor
-    @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-    public record Variant(String size100, String size150, String size300) {
+    public static record Variant(String size100, String size150, String size300) {
 
         public static Variant fromJsonObject(JsonObject object) {
             var size100 = Optional.ofNullable(object.get("size_100").getAsJsonObject())

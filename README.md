@@ -15,7 +15,7 @@ This SDK aims to simplify API calls
 - [ ] Implement other API methods
 - [ ] Make detailed documentation
 - [ ] Introduce Enums for constant values left out
-- [ ] Create ability for passing own HttpClient to all request executors
+- [x] Create ability for passing own HttpClient to all request executors
 
 ###### Examples:
 OAuth URL generation and token request example:

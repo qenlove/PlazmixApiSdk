@@ -17,7 +17,12 @@ import static org.asynchttpclient.Dsl.asyncHttpClient;
 
 public class Online {
 
-    private static final AsyncHttpClient ASYNC_HTTP_CLIENT = asyncHttpClient();
+    private static AsyncHttpClient ASYNC_HTTP_CLIENT = asyncHttpClient();
+
+    public Online withSpecifiedAsyncHttpClient(AsyncHttpClient asyncHttpClient) {
+        ASYNC_HTTP_CLIENT = asyncHttpClient;
+        return this;
+    }
 
     public OnlineRequest.OnlineRequestBuilder now() {
         return OnlineRequest.onlineRequestBuilder().day(null);
@@ -27,7 +32,7 @@ public class Online {
         return OnlineRequest.onlineRequestBuilder();
     }
 
-    public record OnlineRequest(String token, String day) {
+    public static record OnlineRequest(String token, String day) {
 
         private static final String REQUEST_URL_FORMAT = "https://api.plazmix.net/v1/Online.now";
 
@@ -52,7 +57,7 @@ public class Online {
         }
     }
 
-    public record OnlineResponse(boolean successful, String errorName, String comment, OnlineCount current,
+    public static record OnlineResponse(boolean successful, String errorName, String comment, OnlineCount current,
                               OnlineCount peak, OnlineCount minimal) {
 
         static OnlineResponse fromJsonResponse(String jsonResponse) {

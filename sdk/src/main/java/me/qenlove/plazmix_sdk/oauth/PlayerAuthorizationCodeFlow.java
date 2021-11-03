@@ -17,7 +17,12 @@ import static org.asynchttpclient.Dsl.asyncHttpClient;
 
 public class PlayerAuthorizationCodeFlow {
 
-    private static final AsyncHttpClient ASYNC_HTTP_CLIENT = asyncHttpClient();
+    private static AsyncHttpClient ASYNC_HTTP_CLIENT = asyncHttpClient();
+
+    public PlayerAuthorizationCodeFlow withSpecifiedAsyncHttpClient(AsyncHttpClient asyncHttpClient) {
+        ASYNC_HTTP_CLIENT = asyncHttpClient;
+        return this;
+    }
 
     public ClientRequest.ClientRequestBuilder clientRequest() {
         return ClientRequest.clientRequestBuilder();
@@ -27,7 +32,7 @@ public class PlayerAuthorizationCodeFlow {
         return TokenRequest.tokenRequestBuilder();
     }
 
-    public record ClientRequest(ResponseType responseType, String clientId, String redirectUri, Scope scope,
+    public static record ClientRequest(ResponseType responseType, String clientId, String redirectUri, Scope scope,
                                 String state) {
 
         private static final String REQUEST_URL_FORMAT = "https://auth.plazmix.net/oauth2/authorize?response_type=%s" +
@@ -47,7 +52,7 @@ public class PlayerAuthorizationCodeFlow {
         }
     }
 
-    public record TokenRequest(String code, String clientSecret, GrantType grantType, String redirectUri) {
+    public static record TokenRequest(String code, String clientSecret, GrantType grantType, String redirectUri) {
 
         public static final String REQUEST_URL = "https://api.plazmix.net/v1/Oauth2.accessToken";
 
@@ -76,7 +81,7 @@ public class PlayerAuthorizationCodeFlow {
         }
     }
 
-    public record TokenResponse(boolean successful, String comment, String errorName, String accessToken,
+    public static record TokenResponse(boolean successful, String comment, String errorName, String accessToken,
                                 String tokenType, String expiresIn) {
 
         static TokenResponse fromJsonResponse(String jsonResponse) {

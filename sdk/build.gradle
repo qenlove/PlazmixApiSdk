@@ -5,6 +5,9 @@ plugins {
 group 'me.qenlove.plazmix'
 version '0.0.1'
 
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
 repositories {
     mavenCentral()
 }
@@ -14,6 +17,8 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 
     compileOnly 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+
     implementation 'com.google.guava:guava:r05'
     implementation 'org.asynchttpclient:async-http-client-bom:2.12.3'
     implementation 'org.asynchttpclient:async-http-client:2.12.3'

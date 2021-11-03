@@ -23,7 +23,12 @@ import static org.asynchttpclient.Dsl.asyncHttpClient;
 
 public class User {
 
-    private static final AsyncHttpClient ASYNC_HTTP_CLIENT = asyncHttpClient();
+    private static AsyncHttpClient ASYNC_HTTP_CLIENT = asyncHttpClient();
+
+    public User withSpecifiedAsyncHttpClient(AsyncHttpClient asyncHttpClient) {
+        ASYNC_HTTP_CLIENT = asyncHttpClient;
+        return this;
+    }
 
     public GetRequest.GetRequestBuilder get() {
         return GetRequest.getRequestBuilder();
@@ -41,7 +46,7 @@ public class User {
         return MeRequest.meRequestBuilder();
     }
 
-    public record GetRequest(String token, String nickname, UUID uuid, int id) {
+    public static record GetRequest(String token, String nickname, UUID uuid, int id) {
 
         private static final String REQUEST_URL_FORMAT = "https://api.plazmix.net/v1/User.get";
 
@@ -69,7 +74,7 @@ public class User {
         }
     }
 
-    public record GetResponse(boolean successful, String errorName, String comment, UserData userData) {
+    public static record GetResponse(boolean successful, String errorName, String comment, UserData userData) {
 
         static GetResponse fromJsonResponse(String jsonResponse) {
             var object = JsonParser.parseString(jsonResponse).getAsJsonObject();
@@ -84,7 +89,7 @@ public class User {
         }
     }
 
-    public record OnlineStatusRequest(String token, String nickname, UUID uuid, int id) {
+    public static record OnlineStatusRequest(String token, String nickname, UUID uuid, int id) {
 
         private static final String REQUEST_URL_FORMAT = "https://api.plazmix.net/v1/User.onlineStatus";
 
@@ -112,7 +117,7 @@ public class User {
         }
     }
 
-    public record OnlineStatusResponse(boolean successful, String errorName, String comment,
+    public static record OnlineStatusResponse(boolean successful, String errorName, String comment,
                                        OnlineStatus status) {
 
         static OnlineStatusResponse fromJsonResponse(String jsonResponse) {
@@ -131,7 +136,7 @@ public class User {
         }
     }
 
-    public record StaffRequest(String token, Rank rank) {
+    public static record StaffRequest(String token, Rank rank) {
 
         private static final String REQUEST_URL_FORMAT = "https://api.plazmix.net/v1/User.staff";
 
@@ -158,7 +163,7 @@ public class User {
         }
     }
 
-    public record StaffResponse(boolean successful, String errorName, String comment,
+    public static record StaffResponse(boolean successful, String errorName, String comment,
                                        List<UserData> staff) {
 
         static StaffResponse fromJsonResponse(String jsonResponse) {
@@ -183,7 +188,7 @@ public class User {
         }
     }
 
-    public record MeRequest(String token) {
+    public static record MeRequest(String token) {
 
         private static final String REQUEST_URL_FORMAT = "https://api.plazmix.net/v1/User.me";
 
@@ -206,7 +211,7 @@ public class User {
         }
     }
 
-    public record MeResponse(boolean successful, String errorName, String comment,
+    public static record MeResponse(boolean successful, String errorName, String comment,
                                 UserData userData) {
 
         static MeResponse fromJsonResponse(String jsonResponse) {
